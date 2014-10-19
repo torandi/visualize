@@ -7,18 +7,26 @@
 namespace audio {
 
 pa_simple* hndl;
+static unsigned int buffer_size;
 
-bool initialize(const char* device) {
+float* buffer;
+
+bool initialize(const char* device, unsigned int N) {
+	printf("Initializing pulse audio.\n");
 	pa_sample_spec ss;
-	//pa_buffer_attr attr;
+	pa_buffer_attr attr;
 	int err;
 
-	ss.format = PA_SAMPLE_S16NE;
-	ss.channels = 2;
+	buffer_size = N;
+
+	buffer = new float[buffer_size];
+
+	ss.format = PA_SAMPLE_FLOAT32NE;
+	ss.channels = 1;
 	ss.rate = 44100;
 
-	//attr.maxlength = ;
-	//attr.fragsize = BUFSIZE;
+	attr.maxlength = N*sizeof(float);
+	attr.fragsize = N*sizeof(float);
 
 	hndl = pa_simple_new(NULL,
 	                     "Frobnicators Visualizer",
@@ -40,20 +48,23 @@ bool initialize(const char* device) {
 void terminate() {
 	if(hndl == nullptr) return;
 	pa_simple_free(hndl);
+
+	delete[] buffer;
 }
 
 void read() {
-	int16_t buffer[512];
 	int err;
-	if(pa_simple_read(hndl, &buffer, sizeof(buffer), &err) < 0) {
+	if(pa_simple_read(hndl, buffer, buffer_size * sizeof(float), &err) < 0) {
 		printf("Failed to read sound: %s\n", pa_strerror(err));
-	} else {
-		for(int i=0; i<512; ++i) {
-			printf("%d ", buffer[i]);
-			if(i%10 == 9) printf("\n");
+	}/* else {
+		for(int i=0; i<1024; ++i) {
+			printf("%f ", buffer[i]);
+			if(i%16 == 15) printf("\n");
 		}
-	}
+	}*/
 }
+
+const float* const get_buffer() { return buffer; }
 
 
 }

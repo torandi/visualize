@@ -3,10 +3,12 @@
 
 namespace audio {
 
-bool initialize(const char* device);
+bool initialize(const char* device, unsigned int N);
 void terminate();
 
 void read();
+
+const float* const get_buffer();
 
 }
 
