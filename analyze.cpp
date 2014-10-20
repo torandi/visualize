@@ -1,8 +1,8 @@
 #include "analyze.h"
 #include <fftw3.h>
 #include <cmath>
-
 #include <complex>
+#include <algorithm>
 
 namespace analyze {
 
@@ -16,6 +16,10 @@ unsigned int buffer_size;
 
 float inv_n;
 
+float clamp(float v, float low, float high) {
+	return std::max(std::min(v, high), low);
+}
+
 void initialize(unsigned int N) {
 	printf("Initializing fftw for DFT of size %d.\n", N);
 
@@ -26,7 +30,7 @@ void initialize(unsigned int N) {
 	out = static_cast<std::complex<float>*>(fftwf_malloc(sizeof(fftwf_complex) * N));
 	plan = fftwf_plan_dft_1d(N, reinterpret_cast<fftwf_complex*>(in), reinterpret_cast<fftwf_complex*>(out), FFTW_FORWARD, FFTW_MEASURE);
 
-	amplitude = new float[buffer_size];
+	amplitude = new float[buffer_size/2];
 }
 
 void terminate() {
@@ -47,9 +51,8 @@ void execute() {
 	fftwf_execute(plan);
 
 	// Calculate amplitude
-	for(unsigned int i=0; i<buffer_size; ++i) {
-		amplitude[i] = std::abs(out[i]) * inv_n;
-		if(amplitude[i] > 1.f) printf("%f\n", amplitude[i]);
+	for(unsigned int i=0; i<buffer_size/2; ++i) {
+		amplitude[i] = clamp(log10(std::abs(out[i]) * inv_n), -100, 100);
 	}
 }
 
