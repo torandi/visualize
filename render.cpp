@@ -51,13 +51,13 @@ void render(const float* const amplitudes) {
 	int width = 4;
 	int dist = 2;
 
-	float height = 50.0;
+	float height = 250.0;
 
 	for(int i=0; i<(buffer_size/2); ++i) {
 		float val = amplitudes[i];
 
 		int x = i*(dist*2+width);
-		int y_top = 240 - ((val + 5.0) * height);
+		int y_top = 240 - (val*5.0) * height;
 
 		if(x > 640) break;
 

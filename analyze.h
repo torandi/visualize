@@ -9,6 +9,7 @@ namespace analyze {
 	void execute();
 
 	const float* const get_amplitudes();
+	const float* const get_range_values();
 }
 
 #endif
